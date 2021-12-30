@@ -2,7 +2,20 @@
 name = "cpu-scheduling"
 version = "0.1.0"
 edition = "2021"
+authors = ["Saeed Andalib <saeedandalib5@gmail.com>"]
+description = "CPU Scheduling Algorithms in Rust"
+readme = "README.md"
+repository = "https://github.com/SaeedAndalib/dfa"
+license-file = "LICENSE"
+keywords = ["CPU Scheduling", "Scheduling", "OS", "Rust"]
+categories = ["command-line-utilities"]
+publish = false
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+path = "src/lib/mod.rs"
+name = "cpu_scheduling_utils"
+
 [dependencies]
+structopt = "0.3"
