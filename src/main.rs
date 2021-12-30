@@ -1,3 +1,7 @@
+use structopt::StructOpt;
+use cpu_scheduling_utils::cli::operations::Operations;
+
 fn main() {
-    println!("Hello, world!");
+    let args = Operations::from_args();
+    println!("{:?}", args);
 }
