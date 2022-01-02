@@ -33,6 +33,54 @@ impl Process {
 }
 
 impl Timestamp {
+    pub fn shortest_remaining_time_next(processes: &Vec<Process>) -> Vec<Timestamp> {
+        let mut timestamps = Vec::new();
+        let mut time = 0;
+
+        let mut processes = processes.clone();
+
+        let mut queue = Vec::new();
+
+        while !processes.is_empty() || !queue.is_empty() {
+            loop {
+                if !processes.is_empty() && processes[0].arrival_time <= time {
+                    queue.push(processes.remove(0));
+                } else {
+                    break;
+                }
+            }
+
+            if !queue.is_empty() {
+                let mut shortest_burst_time = f32::INFINITY;
+                let mut shortest_burst_time_index = 0;
+
+                let mut i = 0;
+                while i < queue.len() {
+                    if (queue[i].burst_time as f32) < shortest_burst_time {
+                        shortest_burst_time = queue[i].burst_time as f32;
+                        shortest_burst_time_index = i;
+                    }
+                    i += 1;
+                }
+
+                queue[shortest_burst_time_index].burst_time -= 1;
+                time += 1;
+                timestamps.push(Timestamp {
+                    time,
+                    process: queue[shortest_burst_time_index].clone(),
+                });
+
+                if queue[shortest_burst_time_index].burst_time == 0 {
+                    queue.remove(shortest_burst_time_index);
+                }
+            } else {
+                time += 1;
+            }
+        }
+
+        timestamps
+    }
+
     pub fn highest_response_ratio_next(processes: &Vec<Process>) -> Vec<Timestamp> {
         let mut timestamps = Vec::new();
         let mut time = 0;
