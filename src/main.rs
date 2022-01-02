@@ -13,9 +13,11 @@ fn main() {
     let mut scheduler = Scheduler {
         time: 0,
         timestamps: vec![],
+        processes,
+        queue1: vec![]
     };
 
-    scheduler.multi_level_feedback_queue(&processes, conf.rr_quantum, conf.multi_level_rr_quantum);
+    scheduler.rr(conf.rr_quantum);
 
     for timestamp in scheduler.timestamps {
         print!("{:?}", timestamp.process.name);

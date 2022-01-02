@@ -125,66 +125,63 @@ impl Timestamp {
 
         timestamps
     }
-
-    pub fn rr(processes: &Vec<Process>, quantum: i32) -> Vec<Timestamp> {
-        let mut timestamps = Vec::new();
-        let mut time = 0;
-
-        let mut processes: Vec<Process> = processes.clone();
-        processes.sort_by(|a, b| a.arrival_time.cmp(&b.arrival_time));
-
-        let mut queue: Vec<Process> = Vec::new();
-
-        while !processes.is_empty() || !queue.is_empty() {
-            loop {
-                if !processes.is_empty() && processes[0].arrival_time <= time {
-                    queue.push(processes.remove(0));
-                } else {
-                    break;
-                }
-            }
-
-            if !queue.is_empty() {
-                let mut process = queue.remove(0);
-
-                if process.burst_time > quantum {
-                    process.burst_time -= quantum;
-                    time += quantum as i64;
-                    timestamps.push(Timestamp {
-                        time,
-                        process: process.clone(),
-                    });
-                    loop {
-                        if !processes.is_empty() && processes[0].arrival_time <= time {
-                            queue.push(processes.remove(0));
-                        } else {
-                            break;
-                        }
-                    }
-                    queue.push(process);
-                } else {
-                    time += process.burst_time as i64;
-                    process.burst_time = 0;
-                    timestamps.push(Timestamp {
-                        time,
-                        process,
-                    });
-                }
-            } else {
-                time += 1;
-            }
-        }
-
-        timestamps
-    }
 }
 
 pub struct Scheduler {
     pub time: i64,
     pub timestamps: Vec<Timestamp>,
+    pub processes: Vec<Process>,
+    pub queue1: Vec<Process>,
 }
 
 impl Scheduler {
+    fn check_new_process_arrival(&mut self, processes: &mut Vec<Process>) {
+        loop {
+            if !processes.is_empty() && processes[0].arrival_time <= self.time {
+                self.queue1.push(processes.remove(0));
+            } else {
+                break;
+            }
+        }
+    }
+
+    pub fn rr(&mut self, quantum: i32) {
+        self.time = 0;
+        self.timestamps = Vec::new();
+
+        let mut processes: Vec<Process> = self.processes.clone();
+        processes.sort_by(|a, b| a.arrival_time.cmp(&b.arrival_time));
+
+        while !processes.is_empty() || !self.queue1.is_empty() {
+            self.check_new_process_arrival(&mut processes);
+
+            if !self.queue1.is_empty() {
+                let mut process = self.queue1.remove(0);
+
+                if process.burst_time > quantum {
+                    process.burst_time -= quantum;
+                    self.time += quantum as i64;
+                    self.timestamps.push(Timestamp {
+                        time: self.time,
+                        process: process.clone(),
+                    });
+
+                    self.check_new_process_arrival(&mut processes);
+                    self.queue1.push(process);
+                } else {
+                    self.time += process.burst_time as i64;
+                    process.burst_time = 0;
+                    self.timestamps.push(Timestamp {
+                        time: self.time,
+                        process,
+                    });
+                }
+            } else {
+                self.time += 1;
+            }
+        }
+    }
+
     fn mlfq_rr_processor(&mut self, queue: &mut Vec<Process>, next_queue: &mut Vec<Process>, quantum: i32) {
         while !queue.is_empty() {
             let mut process = queue.remove(0);
