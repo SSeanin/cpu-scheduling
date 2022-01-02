@@ -33,6 +33,49 @@ impl Process {
 }
 
 impl Timestamp {
+    pub fn highest_response_ratio_next(processes: &Vec<Process>) -> Vec<Timestamp> {
+        let mut timestamps = Vec::new();
+        let mut time = 0;
+
+        let mut processes: Vec<Process> = processes.clone();
+
+        while processes.len() > 0 {
+            let mut highest_ratio = 0.0;
+            let mut highest_ratio_index = 0;
+
+            let mut i = 0;
+            let mut process_in_queue = false;
+            while i < processes.len() {
+                if processes[i].arrival_time <= time {
+                    process_in_queue = true;
+                    let mut ratio = processes[i].waiting_time as f64 / processes[i].burst_time as f64;
+                    if ratio.is_sign_positive() && ratio > highest_ratio {
+                        highest_ratio = ratio;
+                        highest_ratio_index = i;
+                    }
+                }
+                i += 1;
+            }
+
+            if process_in_queue {
+                let process = processes.remove(highest_ratio_index);
+                time += process.burst_time as i64;
+                timestamps.push(Timestamp {
+                    time,
+                    process,
+                });
+                process_in_queue = false;
+                processes.iter_mut()
+                    .for_each(|mut p|
+                        p.waiting_time = if p.arrival_time <= time { time - p.arrival_time } else { 0 });
+            } else {
+                time += 1;
+            }
+        }
+
+        timestamps
+    }
+
     pub fn rr(processes: &Vec<Process>, quantum: i32) -> Vec<Timestamp> {
         let mut timestamps = Vec::new();
         let mut time = 0;
