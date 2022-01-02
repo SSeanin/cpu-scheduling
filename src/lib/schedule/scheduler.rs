@@ -199,8 +199,8 @@ impl Scheduler {
                 });
                 next_queue.push(process);
             } else {
-                process.burst_time = 0;
                 self.time += process.burst_time as i64;
+                process.burst_time = 0;
                 self.timestamps.push(Timestamp {
                     time: self.time,
                     process: process.clone(),
@@ -246,6 +246,14 @@ impl Scheduler {
                 if !queue1.is_empty() {
                     self.mlfq_rr_processor(&mut queue1, &mut queue2, queue1_quantum);
                 }
+
+                // loop {
+                //     if !processes.is_empty() && processes[0].arrival_time <= self.time {
+                //         queue1.push(processes.remove(0));
+                //     } else {
+                //         break;
+                //     }
+                // }
 
                 if !queue2.is_empty() {
                     self.mlfq_rr_processor(&mut queue2, &mut queue3, queue2_quantum);
