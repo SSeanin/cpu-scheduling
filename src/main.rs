@@ -10,7 +10,7 @@ fn main() {
 
     let processes = Process::from(&conf);
 
-    let timestamps = Timestamp::rr(&processes, conf.rr_quantum);
+    let timestamps = Timestamp::highest_response_ratio_next(&processes);
 
     for timestamp in timestamps {
         print!("{:?}", timestamp.process.name);
