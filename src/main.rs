@@ -1,7 +1,7 @@
 use structopt::StructOpt;
 use cpu_scheduling_utils::cli::operations::Operations;
 use cpu_scheduling_utils::config::parser::Config;
-use cpu_scheduling_utils::schedule::scheduler::{Process, Timestamp};
+use cpu_scheduling_utils::schedule::scheduler::{Process, Timestamp, Scheduler};
 
 fn main() {
     let ops: Operations = Operations::from_args();
@@ -10,9 +10,14 @@ fn main() {
 
     let processes = Process::from(&conf);
 
-    let timestamps = Timestamp::shortest_remaining_time_next(&processes);
+    let mut scheduler = Scheduler {
+        time: 0,
+        timestamps: vec![],
+    };
 
-    for timestamp in timestamps {
+    scheduler.multi_level_feedback_queue(&processes, conf.rr_quantum, conf.multi_level_rr_quantum);
+
+    for timestamp in scheduler.timestamps {
         print!("{:?}", timestamp.process.name);
         println!(" {}", timestamp.time);
     }
